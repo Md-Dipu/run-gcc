@@ -1,0 +1,14 @@
+# Temporary files
+*.out
+*.o
+*.exe
+
+# Editor and IDE files
+.vscode/
+.idea/
+*.swp
+*~
+
+# System files
+.DS_Store
+Thumbs.db

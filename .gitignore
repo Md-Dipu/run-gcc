@@ -12,6 +12,11 @@
 *.swp
 *~
 
+# Ignore pkg/ except Arch templates
+pkg/*
+!pkg/arch/
+!pkg/arch/PKGBUILD
+
 # System files
 .DS_Store
 Thumbs.db

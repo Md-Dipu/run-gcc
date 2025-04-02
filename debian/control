@@ -1,0 +1,12 @@
+Source: run-gcc
+Section: utils
+Priority: optional
+Maintainer: Md. Dipu <srdipu@hotmail.com>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.6.0
+
+Package: run-gcc
+Architecture: all
+Depends: gcc, g++, file
+Description: Compile and run C/C++ programs
+ Simple utility to compile and execute C/C++ source files.

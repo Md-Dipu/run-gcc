@@ -1,0 +1,17 @@
+# Maintainer: Md. Dipu <srdipu@hotmail.com>
+pkgname=run-gcc
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="Compile and run C/C++ programs"
+arch=('any')
+url="https://github.com/Md-Dipu/run-gcc"
+license=('MIT')
+depends=('gcc' 'file')
+source=("$url/archive/v$pkgver.tar.gz")
+sha256sums=('SKIP')
+
+package() {
+  cd "$pkgname-$pkgver"
+  make DESTDIR="$pkgdir" install
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

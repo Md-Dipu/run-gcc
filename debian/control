@@ -2,11 +2,17 @@ Source: run-gcc
 Section: utils
 Priority: optional
 Maintainer: Md. Dipu <srdipu@hotmail.com>
+Rules-Requires-Root: no
 Build-Depends: debhelper-compat (= 13)
-Standards-Version: 4.6.0
+Standards-Version: 4.6.2
+Homepage: https://github.com/Md-Dipu/run-gcc
+Vcs-Browser: https://github.com/Md-Dipu/run-gcc
+Vcs-Git: https://github.com/Md-Dipu/run-gcc.git
 
 Package: run-gcc
-Architecture: all
-Depends: gcc, g++, file
-Description: Compile and run C/C++ programs
- Simple utility to compile and execute C/C++ source files.
+Architecture: any
+Multi-Arch: foreign
+Depends: gcc, g++, file, ${shlibs:Depends}, ${misc:Depends}
+Description: Compile and run C/C++ files quickly
+  A utility to automatically compile and execute C/C++ programs
+  with sensible defaults.

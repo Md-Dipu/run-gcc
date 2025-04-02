@@ -3,6 +3,36 @@
 *.o
 *.exe
 
+# Build products
+*.deb
+*.buildinfo
+*.changes
+*.dsc
+*.tar.gz
+*.tar.xz
+
+# Debian packaging artifacts
+debian/.debhelper/
+debian/files
+debian/*.debhelper.log
+debian/*.substvars
+debian/*.debhelper
+debian/debhelper-build-stamp
+debian/tmp/
+debian/run-gcc
+debian/*.install
+debian/*.links
+debian/*.maintscript
+debian/*.postinst
+debian/*.postrm
+debian/*.preinst
+debian/*.prerm
+
+# Ignore pkg/ except Arch templates
+pkg/*
+!pkg/arch/
+!pkg/arch/PKGBUILD
+
 # Editor and IDE files
 .vscode/*
 !.vscode/extensions.json
@@ -11,11 +41,6 @@
 .idea/
 *.swp
 *~
-
-# Ignore pkg/ except Arch templates
-pkg/*
-!pkg/arch/
-!pkg/arch/PKGBUILD
 
 # System files
 .DS_Store

@@ -1,0 +1,44 @@
+name: CI
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "docs/**"
+      - "*.md"
+  pull_request:
+    paths-ignore:
+      - "docs/**"
+      - "*.md"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up cache for apt
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt
+          key: ${{ runner.os }}-apt-cache
+          restore-keys: |
+            ${{ runner.os }}-apt-cache
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bats gcc g++
+
+      - name: Cache bats tests
+        uses: actions/cache@v4
+        with:
+          path: tests/
+          key: ${{ runner.os }}-bats-tests
+          restore-keys: |
+            ${{ runner.os }}-bats-tests
+
+      - name: Run tests
+        run: bats tests/

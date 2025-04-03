@@ -14,11 +14,17 @@ show_help() {
   echo "Usage: $(basename "$0") [OPTIONS] <source_file>"
   echo
   echo "Options:"
-  echo "  -h, --help    Show this help message and exit"
+  echo "  -h, --help       Show this help message"
+  echo "  -v, --version    Show script version"
   echo
   echo "Description:"
   echo "  This script compiles and runs C/C++ programs."
   echo "  Provide a C or C++ source file as an argument."
+}
+
+# Function to display version
+show_version() {
+  echo "$(basename "$0") version 0.1.0"
 }
 
 # Function to determine the compiler based on file extension
@@ -47,7 +53,7 @@ run_program() {
 
 # Main function
 main() {
-  # Check for help argument
+  # Check for arguments
   if [[ $# -eq 0 ]]; then
     error_exit "Please specify a C/C++ file"
   fi
@@ -55,6 +61,10 @@ main() {
   case "$1" in
   -h | --help)
     show_help
+    exit 0
+    ;;
+  -v | --version)
+    show_version
     exit 0
     ;;
   esac

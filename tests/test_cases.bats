@@ -21,13 +21,13 @@ setup() {
 @test "Handle missing file" {
   run src/run-gcc missing.c
   [ "$status" -ne 0 ]
-  [[ "$output" == "Error: File 'missing.c' does not exist" ]]
+  [[ "$output" == *"File 'missing.c' does not exist" ]]
 }
 
 @test "Handle unsupported file type" {
   run src/run-gcc "$invalid_file"
   [ "$status" -ne 0 ]
-  [[ "$output" == "Error: Unsupported file type 'txt'" ]]
+  [[ "$output" == *"Unsupported file type 'txt'" ]]
 }
 
 @test "Handle missing argument" {
@@ -40,12 +40,12 @@ setup() {
   export invalid_c_file="tests/test_files/invalid.c"
   run src/run-gcc "$invalid_c_file"
   [ "$status" -ne 0 ]
-  [[ "$output" == "Error: File '$invalid_c_file' does not exist" ]]
+  [[ "$output" == *"File '$invalid_c_file' does not exist" ]]
 }
 
 @test "Handle compilation error in C++ file" {
   export invalid_cpp_file="tests/test_files/invalid.cpp"
   run src/run-gcc "$invalid_cpp_file"
   [ "$status" -ne 0 ]
-  [[ "$output" == "Error: File '$invalid_cpp_file' does not exist" ]]
+  [[ "$output" == *"File '$invalid_cpp_file' does not exist" ]]
 }

@@ -5,7 +5,7 @@ set -euo pipefail
 
 # Function to display an error message and exit
 error_exit() {
-  echo "Error: $1"
+  echo "Error: $1" >&2
   exit 1
 }
 

@@ -3,37 +3,60 @@
 
 set -euo pipefail
 
-# Ensure a file is provided as an argument
-if [[ $# -eq 0 ]]; then
-  echo "Error: Please specify a C/C++ file"
+# Function to display an error message and exit
+error_exit() {
+  echo "Error: $1"
   exit 1
-fi
+}
 
-source_file="$1"
-source_filename="${source_file##*/}"
-output_file="${source_filename%.*}.out"
+# Function to determine the compiler based on file extension
+get_compiler() {
+  local extension="${1##*.}"
+  case "$extension" in
+  c) echo "gcc" ;;
+  cpp | cc | cxx) echo "g++" ;;
+  *) error_exit "Unsupported file type '$extension'" ;;
+  esac
+}
 
-# Determine compiler based on file extension
-case "${source_file##*.}" in
-c) compiler="gcc" ;;
-cpp | cc | cxx) compiler="g++" ;;
-*)
-  echo "Error: Unsupported file type '${source_file##*.}'"
-  exit 1
-  ;;
-esac
+# Function to compile the source file
+compile_file() {
+  local compiler="$1"
+  local source_file="$2"
+  local output_file="$3"
+  "$compiler" -Wall -Wextra -o "$output_file" "$source_file"
+}
 
-# Check if the file exists
-if [[ ! -f "$source_file" ]]; then
-  echo "Error: File '$source_file' does not exist"
-  exit 1
-fi
+# Function to run the compiled program
+run_program() {
+  local output_file="$1"
+  ./"$output_file"
+}
 
-# Compile the file
-"$compiler" -Wall -Wextra -o "$output_file" "$source_file"
+# Main function
+main() {
+  # Ensure a file is provided as an argument
+  if [[ $# -eq 0 ]]; then
+    error_exit "Please specify a C/C++ file"
+  fi
 
-# Run the compiled program
-./"$output_file"
+  local source_file="$1"
+  local source_filename="${source_file##*/}"
+  local output_file="${source_filename%.*}"
 
-# Clean up the generated output file
-rm -f "$output_file"
+  # Check if the file exists
+  if [[ ! -f "$source_file" ]]; then
+    error_exit "File '$source_file' does not exist"
+  fi
+
+  # Determine the compiler
+  local compiler
+  compiler=$(get_compiler "$source_file")
+
+  # Compile, run, and clean up
+  compile_file "$compiler" "$source_file" "$output_file"
+  run_program "$output_file"
+  rm -f "$output_file"
+}
+
+main "$@"

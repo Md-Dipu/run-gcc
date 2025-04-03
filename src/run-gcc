@@ -4,31 +4,36 @@
 set -euo pipefail
 
 # Ensure a file is provided as an argument
-FILE="${1:?'Error: Please specify a C/C++ file'}"
-FILENAME="${FILE##*/}"
-OUTPUT="${FILENAME%.*}.out"
+if [[ $# -eq 0 ]]; then
+  echo "Error: Please specify a C/C++ file"
+  exit 1
+fi
+
+source_file="$1"
+source_filename="${source_file##*/}"
+output_file="${source_filename%.*}.out"
 
 # Determine compiler based on file extension
-case "${FILE##*.}" in
-c) COMPILER="gcc" ;;
-cpp | cc | cxx) COMPILER="g++" ;;
+case "${source_file##*.}" in
+c) compiler="gcc" ;;
+cpp | cc | cxx) compiler="g++" ;;
 *)
-  echo "Error: Unsupported file type '${FILE##*.}'"
+  echo "Error: Unsupported file type '${source_file##*.}'"
   exit 1
   ;;
 esac
 
 # Check if the file exists
-if [[ ! -f "$FILE" ]]; then
-  echo "Error: File '$FILE' does not exist"
+if [[ ! -f "$source_file" ]]; then
+  echo "Error: File '$source_file' does not exist"
   exit 1
 fi
 
 # Compile the file
-"$COMPILER" -Wall -Wextra -o "$OUTPUT" "$FILE"
+"$compiler" -Wall -Wextra -o "$output_file" "$source_file"
 
 # Run the compiled program
-./"$OUTPUT"
+./"$output_file"
 
 # Clean up the generated output file
-rm -f "$OUTPUT"
+rm -f "$output_file"

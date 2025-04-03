@@ -9,6 +9,18 @@ error_exit() {
   exit 1
 }
 
+# Function to display help message
+show_help() {
+  echo "Usage: $(basename "$0") [OPTIONS] <source_file>"
+  echo
+  echo "Options:"
+  echo "  -h, --help    Show this help message and exit"
+  echo
+  echo "Description:"
+  echo "  This script compiles and runs C/C++ programs."
+  echo "  Provide a C or C++ source file as an argument."
+}
+
 # Function to determine the compiler based on file extension
 get_compiler() {
   local extension="${1##*.}"
@@ -35,10 +47,17 @@ run_program() {
 
 # Main function
 main() {
-  # Ensure a file is provided as an argument
+  # Check for help argument
   if [[ $# -eq 0 ]]; then
     error_exit "Please specify a C/C++ file"
   fi
+
+  case "$1" in
+  -h | --help)
+    show_help
+    exit 0
+    ;;
+  esac
 
   local source_file="$1"
   local source_filename="${source_file##*/}"

@@ -1,14 +1,56 @@
-.TH RUN-GCC 1 "2024-06-20" "1.0" "run-gcc Manual"
+.TH RUN-GCC 1 "2025-04-04" "run-gcc 1.0" "run-gcc Manual"
 .SH NAME
-run-gcc \- Compile and run C/C++ programs
+run-gcc \- A script to compile and run C/C++ programs
 .SH SYNOPSIS
 .B run-gcc
-[\fIFILE\fR]
+[\fIOPTIONS\fR] \fIFILE\fR
 .SH DESCRIPTION
-Quickly compile and execute C/C++ source files.
-.SH EXAMPLES
+.B run-gcc
+is a command-line utility that simplifies the process of compiling and running C and C++ programs. It automatically detects the file type based on the extension and uses the appropriate compiler (\fBgcc\fR for C and \fBg++\fR for C++).
+
+The script also provides options to display help and version information.
+
+.SH OPTIONS
+.TP
+.B \-h, --help
+Display the help message and exit.
+.TP
+.B \-v, --version
+Display the version of the script and exit.
+
+.SH USAGE
+To compile and run a C or C++ program, provide the source file as an argument:
 .TP
 .B run-gcc hello.c
-Compiles and runs the C program
+Compiles and runs the C program \fIhello.c\fR.
+.TP
+.B run-gcc hello.cpp
+Compiles and runs the C++ program \fIhello.cpp\fR.
+
+.SH EXAMPLES
+.TP
+.B run-gcc main.c
+Compiles and executes the C program \fImain.c\fR.
+.TP
+.B run-gcc -h
+Displays the help message.
+.TP
+.B run-gcc -v
+Displays the version of the script.
+
+.SH EXIT STATUS
+.B run-gcc
+exits with the following codes:
+.TP
+.B 0
+Success.
+.TP
+.B 1
+An error occurred (e.g., unsupported file type, missing file, or compilation failure).
+
 .SH AUTHOR
-Md. Dipu  <srdipu@hotmail.com>
+Md. Dipu <srdipu@hotmail.com>
+
+.SH COPYRIGHT
+Copyright (C) 2025 Md. Dipu.  
+This is free software; you can redistribute it and/or modify it under the terms of the MIT License.

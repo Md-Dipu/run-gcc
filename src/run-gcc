@@ -17,6 +17,7 @@ show_help() {
   echo "  -h, --help       Show this help message"
   echo "  -v, --version    Show script version"
   echo "  -i, --input      Specify input file"
+  echo "  -e, --expected   Specify expected output file for comparison"
   echo
   echo "Description:"
   echo "  A versatile Bash script to compile and run C/C++ programs with"
@@ -50,16 +51,30 @@ compile_file() {
 run_program() {
   local output_file="$1"
   local input_file="$2"
+  local program_output
   if [[ -n "$input_file" ]]; then
-    ./"$output_file" <"$input_file"
+    program_output=$(./"$output_file" <"$input_file")
   else
-    ./"$output_file"
+    program_output=$(./"$output_file")
+  fi
+  echo "$program_output"
+}
+
+# Function to compare output with expected output
+compare_output() {
+  local program_output="$1"
+  local expected_file="$2"
+  if diff <(echo "$program_output") "$expected_file" >/dev/null; then
+    echo "Test Passed: Program output matches the expected output."
+  else
+    echo "Test Failed: Program output does not match the expected output."
   fi
 }
 
 # Main function
 main() {
   local input_file=""
+  local expected_file=""
   local source_file=""
 
   # Check if help or version options are provided
@@ -103,6 +118,13 @@ main() {
       input_file="$2"
       shift 2
       ;;
+    -e | --expected)
+      if [[ $# -lt 2 ]]; then
+        error_exit "Missing expected output file after '$1'"
+      fi
+      expected_file="$2"
+      shift 2
+      ;;
     -*)
       error_exit "Unknown option '$1'"
       ;;
@@ -125,13 +147,24 @@ main() {
     error_exit "Input file '$input_file' does not exist"
   fi
 
+  # Check if the expected output file exists (if provided)
+  if [[ -n "$expected_file" && ! -f "$expected_file" ]]; then
+    error_exit "Expected output file '$expected_file' does not exist"
+  fi
+
   # Determine the compiler
   local compiler
   compiler=$(get_compiler "$source_file")
 
   # Compile, run, and clean up
   compile_file "$compiler" "$source_file" "$output_file"
-  run_program "$output_file" "$input_file"
+  local program_output
+  program_output=$(run_program "$output_file" "$input_file")
+  if [[ -n "$expected_file" ]]; then
+    compare_output "$program_output" "$expected_file"
+  else
+    echo "$program_output"
+  fi
   rm -f "$output_file"
 }
 

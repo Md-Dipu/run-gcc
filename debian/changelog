@@ -1,8 +1,18 @@
-run-gcc (0.1.1) UNRELEASED; urgency=medium
+run-gcc (0.2.0) UNRELEASED; urgency=medium
 
-  * Enhance compiler automation by detecting the source file extension using shell string manipulation.
-    - For .c files, use gcc -std=c11.
-    - For .cpp/.cc files, use g++ -std=c++2b.
-    This update streamlines the workflow and reduces user errors.
+  * Project Setup
+    - Configured project structure with initial files.
+    - Integrated Debian package builder for streamlined packaging.
+    - Established a basic compile-and-run environment.
+  * Compiler Automation Enhancement
+    - Automated source file extension detection using shell string manipulation.
+    - For `.c` files, invoked `gcc`.
+    - For `.cpp`/`.cc` files, invoked `g++`.
+    - Streamlined workflow and reduced user errors through these enhancements.
+  * Enhanced Input File Redirection Support
+    - Added support for an optional second argument to specify an input file.
+    - Implemented a file existence check before attempting redirection.
+    - Modified the execution command to redirect input using `< input.txt`.
+    - Updated help messages and documentation to reflect the new functionality.
 
- -- Md. Dipu <srdipu@hotmail.com>  Fri, 04 Apr 2025 03:25:00 +0600
+ -- Md. Dipu <srdipu@hotmail.com>  Fri, 04 Apr 2025 16:52:03 +0600

@@ -25,7 +25,7 @@ show_help() {
 
 # Function to display version
 show_version() {
-  echo "$(basename "$0") version 0.1.1"
+  echo "$(basename "$0") version 0.2.0"
 }
 
 # Function to determine the compiler based on file extension

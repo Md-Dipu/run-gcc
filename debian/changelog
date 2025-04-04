@@ -1,4 +1,4 @@
-run-gcc (0.2.0) UNRELEASED; urgency=medium
+run-gcc (0.3.0) UNRELEASED; urgency=medium
 
   * Project Setup
     - Configured project structure with initial files.
@@ -14,5 +14,9 @@ run-gcc (0.2.0) UNRELEASED; urgency=medium
     - Implemented a file existence check before attempting redirection.
     - Modified the execution command to redirect input using `< input.txt`.
     - Updated help messages and documentation to reflect the new functionality.
-
- -- Md. Dipu <srdipu@hotmail.com>  Fri, 04 Apr 2025 16:52:03 +0600
+  * Output Diff Comparison for Testing
+    - Added functionality to compare actual executable output with an expected output file.
+    - Trimmed leading/trailing whitespace from both outputs before comparison.
+    - Integrated a diff tool to display differences, including colored output for clarity.
+  
+ -- Md. Dipu <srdipu@hotmail.com>  Fri, 04 Apr 2025 21:34:38 +0600

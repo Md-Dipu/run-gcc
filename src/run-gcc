@@ -75,6 +75,7 @@ compare_output() {
       echo "Difference:"
       diff <(echo "$program_output") "$expected_file" || true
     fi
+    return 1
   fi
 }
 
@@ -84,6 +85,7 @@ main() {
   local expected_file=""
   local source_file=""
   local show_diff="false"
+  local exit_code=0
 
   # Check if help or version options are provided
   if [[ $# -ge 1 ]]; then
@@ -171,13 +173,15 @@ main() {
   # Compile, run, and clean up
   compile_file "$compiler" "$source_file" "$output_file"
   local program_output
-  program_output=$(run_program "$output_file" "$input_file")
+  program_output=$(run_program "$output_file" "$input_file") || exit_code=$?
   if [[ -n "$expected_file" ]]; then
-    compare_output "$program_output" "$expected_file" "$show_diff"
+    compare_output "$program_output" "$expected_file" "$show_diff" || exit_code=$?
   else
     echo "$program_output"
   fi
   rm -f "$output_file"
+
+  exit $exit_code
 }
 
 main "$@"

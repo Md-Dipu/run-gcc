@@ -1,4 +1,4 @@
-run-gcc (0.3.1) UNRELEASED; urgency=medium
+run-gcc (1.0.0) unstable; urgency=medium
 
   * Project Setup
     - Configured project structure with initial files.
@@ -22,4 +22,4 @@ run-gcc (0.3.1) UNRELEASED; urgency=medium
     - Introduced a verbose logging mode to provide detailed diagnostics during the build and execution process.
     - Improved error messaging to aid in debugging and system monitoring.
 
- -- Md. Dipu <srdipu@hotmail.com>  Sat, 05 Apr 2025 10:38:01 +0600
+ -- Md. Dipu <srdipu@hotmail.com>  Sat, 05 Apr 2025 11:35:51 +0600

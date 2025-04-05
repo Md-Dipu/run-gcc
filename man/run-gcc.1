@@ -1,14 +1,16 @@
-.TH RUN-GCC 1 "2025-04-04" "run-gcc 1.0" "run-gcc Manual"
+.TH RUN-GCC 1 "2025-04-05" "run-gcc 1.0" "run-gcc Manual"
 .SH NAME
-run-gcc \- A script to compile and run C/C++ programs
+run-gcc \- A versatile script to compile and run C/C++ programs
+
 .SH SYNOPSIS
 .B run-gcc
-[\fIOPTIONS\fR] \fIFILE\fR
+[\fIOPTIONS\fR] \fISOURCE_FILE\fR
+
 .SH DESCRIPTION
 .B run-gcc
-is a command-line utility that simplifies the process of compiling and running C and C++ programs. It automatically detects the file type based on the extension and uses the appropriate compiler (\fBgcc\fR for C and \fBg++\fR for C++).
+is a command-line utility designed to simplify the process of compiling and running C and C++ programs. It automatically detects the file type based on the extension and uses the appropriate compiler (\fBgcc\fR for C and \fBg++\fR for C++).
 
-The script also provides options to display help and version information.
+The script also provides additional features such as input/output handling, output comparison, and displaying differences between actual and expected outputs.
 
 .SH OPTIONS
 .TP
@@ -17,6 +19,15 @@ Display the help message and exit.
 .TP
 .B \-v, --version
 Display the version of the script and exit.
+.TP
+.B \-i, --input \fIFILE\fR
+Specify an input file to provide input to the program.
+.TP
+.B \-e, --expected \fIFILE\fR
+Specify an expected output file to compare the program's output.
+.TP
+.B \-d, --diff
+Show the difference between the program's output and the expected output.
 
 .SH USAGE
 To compile and run a C or C++ program, provide the source file as an argument:
@@ -26,6 +37,16 @@ Compiles and runs the C program \fIhello.c\fR.
 .TP
 .B run-gcc hello.cpp
 Compiles and runs the C++ program \fIhello.cpp\fR.
+
+To provide input and compare output:
+.TP
+.B run-gcc -i input.txt -e expected.txt hello.c
+Runs the program \fIhello.c\fR with input from \fIinput.txt\fR and compares the output with \fIexpected.txt\fR.
+
+To display differences between actual and expected outputs:
+.TP
+.B run-gcc -i input.txt -e expected.txt -d hello.cpp
+Runs the program \fIhello.cpp\fR with input from \fIinput.txt\fR, compares the output with \fIexpected.txt\fR, and shows the differences.
 
 .SH EXAMPLES
 .TP
@@ -37,6 +58,9 @@ Displays the help message.
 .TP
 .B run-gcc -v
 Displays the version of the script.
+.TP
+.B run-gcc -i input.txt -e expected.txt -d program.cpp
+Runs \fIprogram.cpp\fR with input from \fIinput.txt\fR, compares the output with \fIexpected.txt\fR, and shows differences if any.
 
 .SH EXIT STATUS
 .B run-gcc

@@ -1,0 +1,24 @@
+version: '3.9'
+
+services:
+  debian-builder:
+    build:
+      context: .
+      dockerfile: docker/deb/Dockerfile
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    container_name: run-gcc-deb
+    # Use debuild to build the Debian package; -us -uc skips signing.
+    command: bash -c "debuild -us -uc && ls ../"
+
+  arch-builder:
+    build:
+      context: .
+      dockerfile: docker/arch/Dockerfile
+    volumes:
+      - .:/workspace
+    working_dir: /workspace/pkg/arch
+    container_name: run-gcc-arch
+    # Run makepkg in the Arch packaging folder.
+    command: bash -c "makepkg -f && ls"

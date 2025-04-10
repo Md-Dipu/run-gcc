@@ -1,0 +1,16 @@
+# Exclude test files and directories
+tests/
+
+# Exclude package files generated during build
+*.deb
+*.pkg.tar.*
+
+# Exclude temporary and log files
+*.log
+*.swp
+*.o
+*.out
+*.tmp
+
+# Optionally exclude documentation or non-essential files
+*.md

@@ -10,7 +10,12 @@ services:
     working_dir: /workspace
     container_name: run-gcc-deb
     # Use debuild to build the Debian package; -us -uc skips signing.
-    command: bash -c "debuild -us -uc && ls ../"
+    command: >
+      bash -c "
+      debuild -us -uc &&
+      mkdir -p debian/build &&
+      mv ../*.deb ../*.build* ../*.changes ../*.dsc ../*.tar.* debian/build/ &&
+      ls debian/build"
 
   arch-builder:
     build:

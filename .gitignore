@@ -5,6 +5,7 @@
 
 # Build products
 *.deb
+*.build
 *.buildinfo
 *.changes
 *.dsc
@@ -13,6 +14,7 @@
 
 # Debian packaging artifacts
 debian/.debhelper/
+debian/build/
 debian/files
 debian/*.debhelper.log
 debian/*.substvars
@@ -30,7 +32,7 @@ debian/*.prerm
 
 # Ignore pkg/ except Arch templates
 pkg/*
-!pkg/arch/
+# !pkg/arch/
 !pkg/arch/PKGBUILD
 
 # Editor and IDE files

@@ -95,12 +95,17 @@ make test
 
 ## Contributing
 
-Contributions are welcome! Please follow these steps:
+Contributions are welcome! If you'd like to contribute to `run-gcc`, please follow the guidelines outlined in the [Contributing Guide](docs/CONTRIBUTING.md).
 
-1. Fork the repository.
+### How to Get Started
+
+1. Fork the repository and clone it locally.
 2. Create a new branch for your feature or bug fix.
-3. Commit your changes with clear messages.
-4. Submit a pull request.
+3. Make your changes, ensuring they follow the project's coding conventions.
+4. Test your changes thoroughly.
+5. Submit a pull request with a detailed description of your changes.
+
+For more details, refer to the [Contributing Guide](docs/CONTRIBUTING.md).
 
 ## License
 

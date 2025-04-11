@@ -10,9 +10,13 @@
 - Provides detailed error messages for unsupported file types, missing files, and compilation errors.
 - Includes options for displaying help and version information.
 
-## Installation
+## Installation, Update, and Uninstallation
 
-To install `run-gcc`, use the provided `Makefile`:
+For detailed instructions on installing, updating, and uninstalling `run-gcc`, please refer to the [Installation Guide](docs/installation-guide.md).
+
+### Quick Installation
+
+To install `run-gcc` using the provided `Makefile`, run:
 
 ```bash
 make install

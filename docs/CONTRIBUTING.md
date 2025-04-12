@@ -61,7 +61,7 @@ Thank you for considering contributing to `run-gcc`! Contributions are welcome a
 
 ## Code of Conduct
 
-Please adhere to the [Code of Conduct](CODE_OF_CONDUCT.md) to ensure a welcoming and inclusive environment for everyone.
+Please adhere to the [Code of Conduct](../CODE_OF_CONDUCT.md) to ensure a welcoming and inclusive environment for everyone.
 
 ## Guidelines for Contributions
 

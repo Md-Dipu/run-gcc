@@ -4,15 +4,22 @@
 set -euo pipefail
 
 # Default configuration values
-compiler_flags="-Wall -Wextra"
-default_input_file=""
-default_expected_file=""
+# General configuration
 show_diff="false"
 cleanup_output="true"
 color_output="true"
 execution_timeout=""
+
+# Compiler configuration
+compiler_flags="-Wall -Wextra"
+c_flags="-std=c11"
+cpp_flags="-std=c++17"
 default_c_compiler="gcc"
 default_cpp_compiler="g++"
+
+# Input/output configuration
+default_input_file=""
+default_expected_file=""
 
 # Function to load configuration files
 load_config() {
@@ -78,7 +85,16 @@ compile_file() {
   local compiler="$1"
   local source_file="$2"
   local output_file="$3"
-  "$compiler" $compiler_flags -o "$output_file" "$source_file"
+  local extension="${source_file##*.}"
+  local specific_flags=""
+
+  # Use language-specific flags
+  case "$extension" in
+  c) specific_flags="$c_flags" ;;
+  cpp | cc | cxx) specific_flags="$cpp_flags" ;;
+  esac
+
+  "$compiler" $compiler_flags $specific_flags -o "$output_file" "$source_file"
 }
 
 # Function to run the compiled program

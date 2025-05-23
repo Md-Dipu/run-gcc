@@ -9,6 +9,7 @@ show_diff="false"
 cleanup_output="true"
 color_output="true"
 execution_timeout=""
+skip_config="false"
 
 # Compiler configuration
 compiler_flags="-Wall -Wextra"
@@ -59,6 +60,7 @@ show_help() {
   echo "  -i, --input      Specify input file"
   echo "  -e, --expected   Specify expected output file for comparison"
   echo "  -d, --diff       Show difference between actual and expected output"
+  echo "  -n, --no-config  Skip loading configuration files"
   echo
   echo "Description:"
   echo "  A versatile Bash script to compile and run C/C++ programs with"
@@ -138,8 +140,6 @@ compare_output() {
 
 # Main function
 main() {
-  load_config
-
   local input_file="$default_input_file"
   local expected_file="$default_expected_file"
   local source_file=""
@@ -189,6 +189,10 @@ main() {
       show_diff="true"
       shift
       ;;
+    -n | --no-config)
+      skip_config="true"
+      shift
+      ;;
     -*)
       error_exit "Unknown option '$1'"
       ;;
@@ -197,6 +201,11 @@ main() {
       ;;
     esac
   done
+
+  # Load configuration files unless skipped
+  if [[ "$skip_config" != "true" ]]; then
+    load_config
+  fi
 
   local source_filename="${source_file##*/}"
   local output_file="${source_filename%.*}"

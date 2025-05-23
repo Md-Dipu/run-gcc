@@ -3,9 +3,42 @@
 
 set -euo pipefail
 
+# Default configuration values
+compiler_flags="-Wall -Wextra"
+default_input_file=""
+default_expected_file=""
+show_diff="false"
+cleanup_output="true"
+color_output="true"
+execution_timeout=""
+default_c_compiler="gcc"
+default_cpp_compiler="g++"
+
+# Function to load configuration files
+load_config() {
+  local global_config="$HOME/.run-gccrc"
+  local local_config="./.run-gccrc"
+
+  # Source global configuration if it exists
+  if [[ -f "$global_config" ]]; then
+    # shellcheck source=/dev/null
+    source "$global_config"
+  fi
+
+  # Source local configuration if it exists
+  if [[ -f "$local_config" ]]; then
+    # shellcheck source=/dev/null
+    source "$local_config"
+  fi
+}
+
 # Function to display an error message and exit
 error_exit() {
-  echo -e "\e[31m\e[1mError:\e[0m $1" >&2
+  if [[ "$color_output" == "true" ]]; then
+    echo -e "\e[31m\e[1mError:\e[0m $1" >&2
+  else
+    echo "Error: $1" >&2
+  fi
   exit 1
 }
 
@@ -34,8 +67,8 @@ show_version() {
 get_compiler() {
   local extension="${1##*.}"
   case "$extension" in
-  c) echo "gcc" ;;
-  cpp | cc | cxx) echo "g++" ;;
+  c) echo "$default_c_compiler" ;;
+  cpp | cc | cxx) echo "$default_cpp_compiler" ;;
   *) error_exit "Unsupported file type '$extension'" ;;
   esac
 }
@@ -45,7 +78,7 @@ compile_file() {
   local compiler="$1"
   local source_file="$2"
   local output_file="$3"
-  "$compiler" -Wall -Wextra -o "$output_file" "$source_file"
+  "$compiler" $compiler_flags -o "$output_file" "$source_file"
 }
 
 # Function to run the compiled program
@@ -67,12 +100,20 @@ compare_output() {
   local expected_file="$2"
   local show_diff="$3"
   if diff <(echo "$program_output") "$expected_file" >/dev/null; then
-    echo -e "\e[32m\e[1mSuccess:\e[0m Program output matches the expected output."
+    if [[ "$color_output" == "true" ]]; then
+      echo -e "\e[32m\e[1mSuccess:\e[0m Program output matches the expected output."
+    else
+      echo "Success: Program output matches the expected output."
+    fi
   else
-    echo -e "\e[31m\e[1mFailure:\e[0m Program output does not match the expected output."
+    if [[ "$color_output" == "true" ]]; then
+      echo -e "\e[31m\e[1mFailure:\e[0m Program output does not match the expected output."
+    else
+      echo "Failure: Program output does not match the expected output."
+    fi
     if [[ "$show_diff" == "true" ]]; then
       echo
-      echo -e "\e[34m\e[1mDifference:\e[0m"
+      echo "Difference:"
       diff <(echo "$program_output") "$expected_file" || true
     fi
     return 1
@@ -81,10 +122,11 @@ compare_output() {
 
 # Main function
 main() {
-  local input_file=""
-  local expected_file=""
+  load_config
+
+  local input_file="$default_input_file"
+  local expected_file="$default_expected_file"
   local source_file=""
-  local show_diff="false"
   local exit_code=0
 
   # Check if help or version options are provided
@@ -113,14 +155,6 @@ main() {
   # Parse remaining arguments
   while [[ $# -gt 0 ]]; do
     case "$1" in
-    -h | --help)
-      show_help
-      exit 0
-      ;;
-    -v | --version)
-      show_version
-      exit 0
-      ;;
     -i | --input)
       if [[ $# -lt 2 ]]; then
         error_exit "Missing input file after '$1'"
@@ -179,7 +213,10 @@ main() {
   else
     echo "$program_output"
   fi
-  rm -f "$output_file"
+
+  if [[ "$cleanup_output" == "true" ]]; then
+    rm -f "$output_file"
+  fi
 
   exit $exit_code
 }

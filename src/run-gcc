@@ -104,11 +104,21 @@ run_program() {
   local output_file="$1"
   local input_file="$2"
   local program_output
-  if [[ -n "$input_file" ]]; then
-    program_output=$(./"$output_file" <"$input_file")
+
+  if [[ -n "$execution_timeout" ]]; then
+    if [[ -n "$input_file" ]]; then
+      program_output=$(timeout "$execution_timeout" ./"$output_file" <"$input_file")
+    else
+      program_output=$(timeout "$execution_timeout" ./"$output_file")
+    fi
   else
-    program_output=$(./"$output_file")
+    if [[ -n "$input_file" ]]; then
+      program_output=$(./"$output_file" <"$input_file")
+    else
+      program_output=$(./"$output_file")
+    fi
   fi
+
   echo "$program_output"
 }
 

@@ -15,6 +15,7 @@ skip_config="false"
 compiler_flags="-Wall -Wextra"
 c_flags="-std=c11"
 cpp_flags="-std=c++17"
+linker_flags="-lm"
 default_c_compiler="gcc"
 default_cpp_compiler="g++"
 
@@ -96,7 +97,7 @@ compile_file() {
   cpp | cc | cxx) specific_flags="$cpp_flags" ;;
   esac
 
-  "$compiler" $compiler_flags $specific_flags -o "$output_file" "$source_file"
+  "$compiler" $compiler_flags $specific_flags -o "$output_file" "$source_file" $linker_flags
 }
 
 # Function to run the compiled program

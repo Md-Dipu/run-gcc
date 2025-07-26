@@ -1,25 +1,54 @@
-run-gcc (1.0.0) unstable; urgency=medium
+run-gcc (1.1.0-1) unstable; urgency=medium
 
-  * Project Setup
-    - Configured project structure with initial files.
-    - Integrated Debian package builder for streamlined packaging.
-    - Established a basic compile-and-run environment.
+  * Configuration File Support
+    - Added support for loading global (~/.run-gccrc) and local (./.run-gccrc) config files.
+    - Implemented --no-config flag to skip configuration loading.
+    - Introduced new configuration variables to enhance flexibility:
+      + Default compiler (gcc/g++)
+      + Default input/expected output files
+      + Cleanup options
+      + Execution timeout
+
+  * Configuration Integration
+    - Updated script logic to honor values from config files, falling back to hardcoded defaults.
+    - Improved default behavior for enhanced customization and automation.
+
+  * Documentation
+    - Included example .run-gccrc file to guide users in customizing behavior.
+    - Updated help output and README to reflect configuration features.
+
+ -- Md. Dipu <srdipu@hotmail.com>  Sat, 26 Jul 2025 14:13:59 +0600
+
+run-gcc (1.0.0-1) unstable; urgency=medium
+
   * Compiler Automation Enhancement
     - Automated source file extension detection using shell string manipulation.
     - For `.c` files, invoked `gcc`.
     - For `.cpp`/`.cc` files, invoked `g++`.
     - Streamlined workflow and reduced user errors through these enhancements.
+
   * Enhanced Input File Redirection Support
     - Added support for an optional second argument to specify an input file.
     - Implemented a file existence check before attempting redirection.
     - Modified the execution command to redirect input using `< input.txt`.
     - Updated help messages and documentation to reflect the new functionality.
+
   * Output Diff Comparison for Testing
     - Added functionality to compare actual executable output with an expected output file.
     - Trimmed leading/trailing whitespace from both outputs before comparison.
     - Integrated a diff tool to display differences, including colored output for clarity.
+
   * Enhanced Logging and Error Reporting
     - Introduced a verbose logging mode to provide detailed diagnostics during the build and execution process.
     - Improved error messaging to aid in debugging and system monitoring.
 
  -- Md. Dipu <srdipu@hotmail.com>  Sat, 05 Apr 2025 11:35:51 +0600
+
+run-gcc (0.1.0-1) UNRELEASED; urgency=medium
+
+  * Initial Release
+    - Configured project structure with initial files.
+    - Integrated Debian package builder for streamlined packaging.
+    - Established a basic compile-and-run environment.
+
+ -- Md. Dipu <srdipu@hotmail.com>  Thu, 03 Apr 2025 02:18:59 +0600

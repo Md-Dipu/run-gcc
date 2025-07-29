@@ -54,14 +54,18 @@ error_exit() {
 # Function to display help message
 show_help() {
   echo "Usage: $(basename "$0") <source_file> [OPTIONS]"
+  echo "       $(basename "$0") --generate-config [--global|-g|--local]"
   echo
   echo "Options:"
-  echo "  -h, --help       Show this help message"
-  echo "  -v, --version    Show script version"
-  echo "  -i, --input      Specify input file"
-  echo "  -e, --expected   Specify expected output file for comparison"
-  echo "  -d, --diff       Show difference between actual and expected output"
-  echo "  -n, --no-config  Skip loading configuration files"
+  echo "  -h, --help            Show this help message"
+  echo "  -v, --version         Show script version"
+  echo "  -i, --input           Specify input file"
+  echo "  -e, --expected        Specify expected output file for comparison"
+  echo "  -d, --diff            Show difference between actual and expected output"
+  echo "  -n, --no-config       Skip loading configuration files"
+  echo "      --generate-config Generate a configuration file (.run-gccrc)"
+  echo "  -g, --global          Generate global config file (in \$HOME)"
+  echo "      --local           Generate local config file (default, in current directory)"
   echo
   echo "Description:"
   echo "  A versatile Bash script to compile and run C/C++ programs with"
@@ -71,6 +75,70 @@ show_help() {
 # Function to display version
 show_version() {
   echo "$(basename "$0") version 1.1.0"
+}
+
+# Function to generate configuration file
+generate_config() {
+  local config_type="$1"  # "global" or "local"
+  local config_file=""
+  
+  case "$config_type" in
+    global)
+      config_file="$HOME/.run-gccrc"
+      ;;
+    local)
+      config_file="./.run-gccrc"
+      ;;
+    *)
+      error_exit "Invalid config type '$config_type'. Use 'global' or 'local'."
+      ;;
+  esac
+  
+  # Check if file already exists
+  if [[ -f "$config_file" ]]; then
+    if [[ "$color_output" == "true" ]]; then
+      echo -e "\e[33m\e[1mWarning:\e[0m Configuration file '$config_file' already exists."
+    else
+      echo "Warning: Configuration file '$config_file' already exists."
+    fi
+    read -p "Do you want to overwrite it? [y/N]: " -r
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+      echo "Configuration generation cancelled."
+      exit 0
+    fi
+  fi
+  
+  # Generate the configuration file
+  cat > "$config_file" << 'EOF'
+#!/usr/bin/env bash
+# run-gcc configuration file
+# This file is sourced by run-gcc to set default values
+
+# General configuration
+show_diff="false"
+cleanup_output="true"
+color_output="true"
+execution_timeout=""
+
+# Compiler configuration
+compiler_flags="-Wall -Wextra"
+c_flags="-std=c11"
+cpp_flags="-std=c++17"
+linker_flags="-lm"
+default_c_compiler="gcc"
+default_cpp_compiler="g++"
+
+# Input/output configuration
+default_input_file=""
+default_expected_file=""
+EOF
+  
+  if [[ "$color_output" == "true" ]]; then
+    echo -e "\e[32m\e[1mSuccess:\e[0m Configuration file created at '$config_file'"
+  else
+    echo "Success: Configuration file created at '$config_file'"
+  fi
+  echo "You can now edit this file to customize your default settings."
 }
 
 # Function to determine the compiler based on file extension
@@ -155,8 +223,10 @@ main() {
   local expected_file=""
   local source_file=""
   local exit_code=0
+  local generate_config_flag="false"
+  local config_type="local"
 
-  # Check if help or version options are provided
+  # Check if help, version, or generate-config options are provided
   if [[ $# -ge 1 ]]; then
     case "$1" in
     -h | --help)
@@ -167,17 +237,46 @@ main() {
       show_version
       exit 0
       ;;
+    --generate-config)
+      generate_config_flag="true"
+      shift
+      
+      # Check for global/local flag
+      if [[ $# -gt 0 ]]; then
+        case "$1" in
+        -g | --global)
+          config_type="global"
+          shift
+          ;;
+        --local)
+          config_type="local"
+          shift
+          ;;
+        -*)
+          error_exit "Unknown option '$1' for --generate-config"
+          ;;
+        esac
+      fi
+      
+      # If only generating config, do it and exit
+      if [[ $# -eq 0 ]]; then
+        generate_config "$config_type"
+        exit 0
+      fi
+      ;;
     esac
   fi
 
-  # Ensure at least one argument is provided
-  if [[ $# -lt 1 ]]; then
+  # If we're not generating config, ensure at least one argument is provided
+  if [[ "$generate_config_flag" == "false" && $# -lt 1 ]]; then
     error_exit "Please specify a C/C++ file"
   fi
 
-  # Extract the source file as the first argument
-  source_file="$1"
-  shift
+  # Extract the source file as the first argument (if not generating config only)
+  if [[ "$generate_config_flag" == "false" ]]; then
+    source_file="$1"
+    shift
+  fi
 
   # Parse remaining arguments
   while [[ $# -gt 0 ]]; do
@@ -212,6 +311,12 @@ main() {
       ;;
     esac
   done
+
+  # If we were generating config and got here, generate it now
+  if [[ "$generate_config_flag" == "true" ]]; then
+    generate_config "$config_type"
+    exit 0
+  fi
 
   # Load configuration files unless skipped
   if [[ "$skip_config" != "true" ]]; then

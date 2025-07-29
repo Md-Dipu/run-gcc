@@ -1,11 +1,11 @@
-run-gcc (1.2.0-1) UNRELEASED; urgency=medium
+run-gcc (1.2.0-2) noble; urgency=medium
 
   * Create default config file
     - Implemented --generate-config flag to create a configuration file with deafult values.
       + --global | -g for creating file at $HOME.
       + --local for current directory (default).
 
- -- Md. Dipu <srdipu@hotmail.com>  Wed, 30 Jul 2025 01:21:33 +0600
+ -- Md. Dipu <srdipu@hotmail.com>  Wed, 30 Jul 2025 01:35:31 +0600
 
 run-gcc (1.1.0-1) unstable; urgency=medium
 

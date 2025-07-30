@@ -1,4 +1,4 @@
-run-gcc (1.2.0-2) noble; urgency=medium
+run-gcc (1.2.0) noble; urgency=medium
 
   * Create default config file
     - Implemented --generate-config flag to create a configuration file with deafult values.
@@ -7,7 +7,7 @@ run-gcc (1.2.0-2) noble; urgency=medium
 
  -- Md. Dipu <srdipu@hotmail.com>  Wed, 30 Jul 2025 01:35:31 +0600
 
-run-gcc (1.1.0-1) unstable; urgency=medium
+run-gcc (1.1.0) unstable; urgency=medium
 
   * Configuration File Support
     - Added support for loading global (~/.run-gccrc) and local (./.run-gccrc) config files.
@@ -28,7 +28,7 @@ run-gcc (1.1.0-1) unstable; urgency=medium
 
  -- Md. Dipu <srdipu@hotmail.com>  Sat, 26 Jul 2025 14:13:59 +0600
 
-run-gcc (1.0.0-1) unstable; urgency=medium
+run-gcc (1.0.0) unstable; urgency=medium
 
   * Compiler Automation Enhancement
     - Automated source file extension detection using shell string manipulation.
@@ -53,7 +53,7 @@ run-gcc (1.0.0-1) unstable; urgency=medium
 
  -- Md. Dipu <srdipu@hotmail.com>  Sat, 05 Apr 2025 11:35:51 +0600
 
-run-gcc (0.1.0-1) UNRELEASED; urgency=medium
+run-gcc (0.1.0) UNRELEASED; urgency=medium
 
   * Initial Release
     - Configured project structure with initial files.

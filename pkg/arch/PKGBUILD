@@ -1,6 +1,6 @@
 # Maintainer: Md. Dipu <srdipu@hotmail.com>
 pkgname=run-gcc
-pkgver=1.0.0
+pkgver=1.2.0
 pkgrel=2
 pkgdesc="Compile and run C/C++ programs"
 arch=('any')

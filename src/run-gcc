@@ -295,7 +295,7 @@ run_program() {
   if [[ "$measure_performance" == "true" ]]; then
     # Create temporary files for time and memory measurement
     local time_file="/tmp/run-gcc-time-$$"
-    local memory_file="/tmp/run-gcc-memory-$$"
+    local stdout_file="/tmp/run-gcc-stdout-$$"
     
     # Use GNU time to measure performance
     local time_cmd="/usr/bin/time"
@@ -303,21 +303,21 @@ run_program() {
     
     if [[ -n "$execution_timeout" ]]; then
       if [[ -n "$input_file" ]]; then
-        { $time_cmd -f "$time_format" timeout "$execution_timeout" ./"$output_file" <"$input_file" 2>"$time_file"; } > "$memory_file" 2>&1 || exit_code=$?
+        $time_cmd -f "$time_format" -o "$time_file" timeout "$execution_timeout" ./"$output_file" <"$input_file" > "$stdout_file" 2>&1 || exit_code=$?
       else
-        { $time_cmd -f "$time_format" timeout "$execution_timeout" ./"$output_file" 2>"$time_file"; } > "$memory_file" 2>&1 || exit_code=$?
+        $time_cmd -f "$time_format" -o "$time_file" timeout "$execution_timeout" ./"$output_file" > "$stdout_file" 2>&1 || exit_code=$?
       fi
     else
       if [[ -n "$input_file" ]]; then
-        { $time_cmd -f "$time_format" ./"$output_file" <"$input_file" 2>"$time_file"; } > "$memory_file" 2>&1 || exit_code=$?
+        $time_cmd -f "$time_format" -o "$time_file" ./"$output_file" <"$input_file" > "$stdout_file" 2>&1 || exit_code=$?
       else
-        { $time_cmd -f "$time_format" ./"$output_file" 2>"$time_file"; } > "$memory_file" 2>&1 || exit_code=$?
+        $time_cmd -f "$time_format" -o "$time_file" ./"$output_file" > "$stdout_file" 2>&1 || exit_code=$?
       fi
     fi
     
-    # Extract program output (everything except the last line which contains timing info)
-    if [[ -f "$memory_file" ]]; then
-      program_output=$(head -n -1 "$memory_file" 2>/dev/null || cat "$memory_file")
+    # Extract program output
+    if [[ -f "$stdout_file" ]]; then
+      program_output=$(cat "$stdout_file")
     fi
     
     # Parse timing information
@@ -346,10 +346,15 @@ run_program() {
     fi
     
     # Clean up temporary files
-    rm -f "$time_file" "$memory_file"
+    rm -f "$time_file" "$stdout_file"
     
-    # Display performance metrics
-    display_performance "$runtime_ms" "$memory_kb" "$time_limit" "$memory_limit" "$tle_status" "$mle_status"
+    # Store performance data in global variables for later display
+    PERF_RUNTIME_MS="$runtime_ms"
+    PERF_MEMORY_KB="$memory_kb"
+    PERF_TIME_LIMIT="$time_limit"
+    PERF_MEMORY_LIMIT="$memory_limit"
+    PERF_TLE_STATUS="$tle_status"
+    PERF_MLE_STATUS="$mle_status"
     
     # Set exit code for TLE/MLE
     if [[ "$tle_status" == "true" || "$mle_status" == "true" ]]; then
@@ -566,6 +571,11 @@ main() {
     compare_output "$program_output" "$expected_file" "$show_diff" || exit_code=$?
   else
     echo "$program_output"
+  fi
+
+  # Display performance metrics if they were collected
+  if [[ "$measure_performance" == "true" && -n "${PERF_RUNTIME_MS:-}" ]]; then
+    display_performance "$PERF_RUNTIME_MS" "$PERF_MEMORY_KB" "$PERF_TIME_LIMIT" "$PERF_MEMORY_LIMIT" "$PERF_TLE_STATUS" "$PERF_MLE_STATUS"
   fi
 
   if [[ "$cleanup_output" == "true" ]]; then

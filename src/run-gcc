@@ -296,6 +296,7 @@ run_program() {
     # Create temporary files for time and memory measurement
     local time_file="/tmp/run-gcc-time-$$"
     local stdout_file="/tmp/run-gcc-stdout-$$"
+    local perf_file="/tmp/run-gcc-perf-$$"
     
     # Use GNU time to measure performance
     local time_cmd="/usr/bin/time"
@@ -345,16 +346,18 @@ run_program() {
       fi
     fi
     
-    # Clean up temporary files
-    rm -f "$time_file" "$stdout_file"
+    # Save performance data to file for later retrieval
+    cat > "$perf_file" << EOF
+PERF_RUNTIME_MS=$runtime_ms
+PERF_MEMORY_KB=$memory_kb
+PERF_TIME_LIMIT=$time_limit
+PERF_MEMORY_LIMIT=$memory_limit
+PERF_TLE_STATUS=$tle_status
+PERF_MLE_STATUS=$mle_status
+EOF
     
-    # Store performance data in global variables for later display
-    PERF_RUNTIME_MS="$runtime_ms"
-    PERF_MEMORY_KB="$memory_kb"
-    PERF_TIME_LIMIT="$time_limit"
-    PERF_MEMORY_LIMIT="$memory_limit"
-    PERF_TLE_STATUS="$tle_status"
-    PERF_MLE_STATUS="$mle_status"
+    # Clean up temporary files (but keep perf_file for main function)
+    rm -f "$time_file" "$stdout_file"
     
     # Set exit code for TLE/MLE
     if [[ "$tle_status" == "true" || "$mle_status" == "true" ]]; then
@@ -574,8 +577,12 @@ main() {
   fi
 
   # Display performance metrics if they were collected
-  if [[ "$measure_performance" == "true" && -n "${PERF_RUNTIME_MS:-}" ]]; then
+  local perf_file="/tmp/run-gcc-perf-$$"
+  if [[ "$measure_performance" == "true" && -f "$perf_file" ]]; then
+    # Read performance data from file
+    source "$perf_file"
     display_performance "$PERF_RUNTIME_MS" "$PERF_MEMORY_KB" "$PERF_TIME_LIMIT" "$PERF_MEMORY_LIMIT" "$PERF_TLE_STATUS" "$PERF_MLE_STATUS"
+    rm -f "$perf_file"
   fi
 
   if [[ "$cleanup_output" == "true" ]]; then

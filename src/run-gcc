@@ -23,6 +23,12 @@ default_cpp_compiler="g++"
 default_input_file=""
 default_expected_file=""
 
+# Performance measurement configuration
+measure_performance="false"
+time_limit=""
+memory_limit=""
+show_performance="true"
+
 # Function to load configuration files
 load_config() {
   local global_config="$HOME/.run-gccrc"
@@ -63,6 +69,10 @@ show_help() {
   echo "  -e, --expected        Specify expected output file for comparison"
   echo "  -d, --diff            Show difference between actual and expected output"
   echo "  -n, --no-config       Skip loading configuration files"
+  echo "  -p, --performance     Measure and display runtime and memory usage"
+  echo "  -t, --time-limit      Set time limit in seconds (for TLE checking)"
+  echo "  -m, --memory-limit    Set memory limit in MB (for MLE checking)"
+  echo "      --no-performance  Disable performance measurement display"
   echo "      --generate-config Generate a configuration file (.run-gccrc)"
   echo "  -g, --global          Generate global config file (in \$HOME)"
   echo "      --local           Generate local config file (default, in current directory)"
@@ -131,6 +141,12 @@ default_cpp_compiler="g++"
 # Input/output configuration
 default_input_file=""
 default_expected_file=""
+
+# Performance measurement configuration
+measure_performance="false"
+time_limit=""
+memory_limit=""
+show_performance="true"
 EOF
   
   if [[ "$color_output" == "true" ]]; then
@@ -151,6 +167,103 @@ get_compiler() {
   esac
 }
 
+# Function to format time in a human-readable way
+format_time() {
+  local time_ms="$1"
+  local time_s time_formatted
+  
+  if (( $(echo "$time_ms >= 1000" | bc -l) )); then
+    time_s=$(echo "scale=3; $time_ms / 1000" | bc -l)
+    printf "%.3fs" "$time_s"
+  else
+    printf "%.0fms" "$time_ms"
+  fi
+}
+
+# Function to format memory in a human-readable way
+format_memory() {
+  local memory_kb="$1"
+  local memory_mb memory_formatted
+  
+  if (( $(echo "$memory_kb >= 1024" | bc -l) )); then
+    memory_mb=$(echo "scale=2; $memory_kb / 1024" | bc -l)
+    printf "%.2f MB" "$memory_mb"
+  else
+    printf "%.0f KB" "$memory_kb"
+  fi
+}
+
+# Function to display performance results with fancy formatting
+display_performance() {
+  local runtime_ms="$1"
+  local memory_kb="$2"
+  local time_limit="$3"
+  local memory_limit="$4"
+  local tle_status="$5"
+  local mle_status="$6"
+  
+  if [[ "$show_performance" != "true" ]]; then
+    return 0
+  fi
+  
+  local formatted_time formatted_memory
+  formatted_time=$(format_time "$runtime_ms")
+  formatted_memory=$(format_memory "$memory_kb")
+  
+  if [[ "$color_output" == "true" ]]; then
+    echo
+    echo -e "\e[1m┌─ Performance Metrics ─────────────────────┐\e[0m"
+    
+    # Runtime display
+    local time_color="\e[32m"  # Green by default
+    local time_status=""
+    if [[ "$tle_status" == "true" ]]; then
+      time_color="\e[31m"  # Red for TLE
+      time_status=" \e[31m\e[1m(TLE)\e[0m"
+    elif [[ -n "$time_limit" ]]; then
+      local time_percentage
+      time_percentage=$(echo "scale=1; ($runtime_ms / 1000) / $time_limit * 100" | bc -l)
+      if (( $(echo "$time_percentage >= 80" | bc -l) )); then
+        time_color="\e[33m"  # Yellow for warning
+      fi
+      time_status=" \e[90m(${time_percentage}% of ${time_limit}s)\e[0m"
+    fi
+    
+    echo -e "\e[1m│\e[0m \e[1mRuntime:\e[0m   ${time_color}\e[1m${formatted_time}\e[0m${time_status}"
+    
+    # Memory display
+    local memory_color="\e[32m"  # Green by default
+    local memory_status=""
+    if [[ "$mle_status" == "true" ]]; then
+      memory_color="\e[31m"  # Red for MLE
+      memory_status=" \e[31m\e[1m(MLE)\e[0m"
+    elif [[ -n "$memory_limit" ]]; then
+      local memory_mb_actual
+      memory_mb_actual=$(echo "scale=2; $memory_kb / 1024" | bc -l)
+      local memory_percentage
+      memory_percentage=$(echo "scale=1; $memory_mb_actual / $memory_limit * 100" | bc -l)
+      if (( $(echo "$memory_percentage >= 80" | bc -l) )); then
+        memory_color="\e[33m"  # Yellow for warning
+      fi
+      memory_status=" \e[90m(${memory_percentage}% of ${memory_limit}MB)\e[0m"
+    fi
+    
+    echo -e "\e[1m│\e[0m \e[1mMemory:\e[0m    ${memory_color}\e[1m${formatted_memory}\e[0m${memory_status}"
+    echo -e "\e[1m└───────────────────────────────────────────┘\e[0m"
+  else
+    echo
+    echo "Performance Metrics:"
+    echo "Runtime: $formatted_time"
+    if [[ "$tle_status" == "true" ]]; then
+      echo "         (TLE - Time Limit Exceeded)"
+    fi
+    echo "Memory:  $formatted_memory"
+    if [[ "$mle_status" == "true" ]]; then
+      echo "         (MLE - Memory Limit Exceeded)"
+    fi
+  fi
+}
+
 # Function to compile the source file
 compile_file() {
   local compiler="$1"
@@ -168,27 +281,99 @@ compile_file() {
   "$compiler" $compiler_flags $specific_flags -o "$output_file" "$source_file" $linker_flags
 }
 
-# Function to run the compiled program
+# Function to run the compiled program with performance measurement
 run_program() {
   local output_file="$1"
   local input_file="$2"
   local program_output
+  local runtime_ms=0
+  local memory_kb=0
+  local tle_status="false"
+  local mle_status="false"
+  local exit_code=0
 
-  if [[ -n "$execution_timeout" ]]; then
-    if [[ -n "$input_file" ]]; then
-      program_output=$(timeout "$execution_timeout" ./"$output_file" <"$input_file")
+  if [[ "$measure_performance" == "true" ]]; then
+    # Create temporary files for time and memory measurement
+    local time_file="/tmp/run-gcc-time-$$"
+    local memory_file="/tmp/run-gcc-memory-$$"
+    
+    # Use GNU time to measure performance
+    local time_cmd="/usr/bin/time"
+    local time_format="%e %M"  # elapsed time in seconds, maximum memory in KB
+    
+    if [[ -n "$execution_timeout" ]]; then
+      if [[ -n "$input_file" ]]; then
+        { $time_cmd -f "$time_format" timeout "$execution_timeout" ./"$output_file" <"$input_file" 2>"$time_file"; } > "$memory_file" 2>&1 || exit_code=$?
+      else
+        { $time_cmd -f "$time_format" timeout "$execution_timeout" ./"$output_file" 2>"$time_file"; } > "$memory_file" 2>&1 || exit_code=$?
+      fi
     else
-      program_output=$(timeout "$execution_timeout" ./"$output_file")
+      if [[ -n "$input_file" ]]; then
+        { $time_cmd -f "$time_format" ./"$output_file" <"$input_file" 2>"$time_file"; } > "$memory_file" 2>&1 || exit_code=$?
+      else
+        { $time_cmd -f "$time_format" ./"$output_file" 2>"$time_file"; } > "$memory_file" 2>&1 || exit_code=$?
+      fi
+    fi
+    
+    # Extract program output (everything except the last line which contains timing info)
+    if [[ -f "$memory_file" ]]; then
+      program_output=$(head -n -1 "$memory_file" 2>/dev/null || cat "$memory_file")
+    fi
+    
+    # Parse timing information
+    if [[ -f "$time_file" ]]; then
+      local time_info
+      time_info=$(cat "$time_file" 2>/dev/null || echo "0.000 0")
+      local runtime_s memory_kb_raw
+      read -r runtime_s memory_kb_raw <<< "$time_info"
+      
+      # Convert seconds to milliseconds
+      runtime_ms=$(echo "$runtime_s * 1000" | bc -l 2>/dev/null || echo "0")
+      memory_kb="$memory_kb_raw"
+      
+      # Check for TLE and MLE
+      if [[ -n "$time_limit" ]] && (( $(echo "$runtime_s > $time_limit" | bc -l) )); then
+        tle_status="true"
+      fi
+      
+      if [[ -n "$memory_limit" ]]; then
+        local memory_mb_actual
+        memory_mb_actual=$(echo "scale=2; $memory_kb / 1024" | bc -l)
+        if (( $(echo "$memory_mb_actual > $memory_limit" | bc -l) )); then
+          mle_status="true"
+        fi
+      fi
+    fi
+    
+    # Clean up temporary files
+    rm -f "$time_file" "$memory_file"
+    
+    # Display performance metrics
+    display_performance "$runtime_ms" "$memory_kb" "$time_limit" "$memory_limit" "$tle_status" "$mle_status"
+    
+    # Set exit code for TLE/MLE
+    if [[ "$tle_status" == "true" || "$mle_status" == "true" ]]; then
+      exit_code=1
     fi
   else
-    if [[ -n "$input_file" ]]; then
-      program_output=$(./"$output_file" <"$input_file")
+    # Original behavior without performance measurement
+    if [[ -n "$execution_timeout" ]]; then
+      if [[ -n "$input_file" ]]; then
+        program_output=$(timeout "$execution_timeout" ./"$output_file" <"$input_file") || exit_code=$?
+      else
+        program_output=$(timeout "$execution_timeout" ./"$output_file") || exit_code=$?
+      fi
     else
-      program_output=$(./"$output_file")
+      if [[ -n "$input_file" ]]; then
+        program_output=$(./"$output_file" <"$input_file") || exit_code=$?
+      else
+        program_output=$(./"$output_file") || exit_code=$?
+      fi
     fi
   fi
 
   echo "$program_output"
+  return $exit_code
 }
 
 # Function to compare output with expected output
@@ -301,6 +486,30 @@ main() {
       ;;
     -n | --no-config)
       skip_config="true"
+      shift
+      ;;
+    -p | --performance)
+      measure_performance="true"
+      shift
+      ;;
+    -t | --time-limit)
+      if [[ $# -lt 2 ]]; then
+        error_exit "Missing time limit after '$1'"
+      fi
+      time_limit="$2"
+      measure_performance="true"
+      shift 2
+      ;;
+    -m | --memory-limit)
+      if [[ $# -lt 2 ]]; then
+        error_exit "Missing memory limit after '$1'"
+      fi
+      memory_limit="$2"
+      measure_performance="true"
+      shift 2
+      ;;
+    --no-performance)
+      show_performance="false"
       shift
       ;;
     -*)

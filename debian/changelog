@@ -1,3 +1,11 @@
+run-gcc (1.3.0) noble; urgency=medium
+
+  * Add performance metrics support
+    - Implemented TLE & MLE checks
+    - Updated status message format
+
+ -- Md. Dipu <srdipu@hotmail.com>  Wed, 06 Aug 2025 13:45:47 +0600
+
 run-gcc (1.2.0) noble; urgency=medium
 
   * Create default config file

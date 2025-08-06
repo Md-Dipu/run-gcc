@@ -389,6 +389,39 @@ compare_output() {
   local program_output="$1"
   local expected_file="$2"
   local show_diff="$3"
+  local runtime_status="${4:-OK}"  # Default to OK if not provided
+  
+  # Check if there were performance issues first
+  if [[ "$runtime_status" != "OK" ]]; then
+    if [[ "$color_output" == "true" ]]; then
+      case "$runtime_status" in
+        "TLE")
+          echo -e "\e[31m\e[1mFailure:\e[0m Program execution failed due to Time Limit Exceeded (TLE)"
+          ;;
+        "MLE")
+          echo -e "\e[31m\e[1mFailure:\e[0m Program execution failed due to Memory Limit Exceeded (MLE)"
+          ;;
+        "TLE+MLE")
+          echo -e "\e[31m\e[1mFailure:\e[0m Program execution failed due to Time Limit Exceeded (TLE) and Memory Limit Exceeded (MLE)"
+          ;;
+      esac
+    else
+      case "$runtime_status" in
+        "TLE")
+          echo "Failure: Program execution failed due to Time Limit Exceeded (TLE)"
+          ;;
+        "MLE")
+          echo "Failure: Program execution failed due to Memory Limit Exceeded (MLE)"
+          ;;
+        "TLE+MLE")
+          echo "Failure: Program execution failed due to Time Limit Exceeded (TLE) and Memory Limit Exceeded (MLE)"
+          ;;
+      esac
+    fi
+    return 1
+  fi
+  
+  # Normal output comparison if no performance issues
   if diff <(echo "$program_output") "$expected_file" >/dev/null; then
     if [[ "$color_output" == "true" ]]; then
       echo -e "\e[32m\e[1mSuccess:\e[0m Program output matches the expected output."
@@ -607,18 +640,70 @@ main() {
   # Compile, run, and clean up
   compile_file "$compiler" "$source_file" "$output_file"
   local program_output
+  local runtime_status="OK"
   program_output=$(run_program "$output_file" "$input_file") || exit_code=$?
-  if [[ -n "$expected_file" ]]; then
-    compare_output "$program_output" "$expected_file" "$show_diff" || exit_code=$?
-  else
-    echo "$program_output"
-  fi
-
-  # Display performance metrics if they were collected
+  
+  # Check for performance issues and set status
   local perf_file="/tmp/run-gcc-perf-$$"
+  local tle_occurred="false"
+  local mle_occurred="false"
+  
   if [[ "$measure_performance" == "true" && -f "$perf_file" ]]; then
     # Read performance data from file
     source "$perf_file"
+    tle_occurred="$PERF_TLE_STATUS"
+    mle_occurred="$PERF_MLE_STATUS"
+    
+    # Set runtime status based on performance issues
+    if [[ "$tle_occurred" == "true" && "$mle_occurred" == "true" ]]; then
+      runtime_status="TLE+MLE"
+    elif [[ "$tle_occurred" == "true" ]]; then
+      runtime_status="TLE"
+    elif [[ "$mle_occurred" == "true" ]]; then
+      runtime_status="MLE"
+    fi
+  fi
+  
+  # Handle output comparison or display
+  if [[ -n "$expected_file" ]]; then
+    # Pass runtime status to compare_output for enhanced messaging
+    compare_output "$program_output" "$expected_file" "$show_diff" "$runtime_status" || exit_code=$?
+  else
+    # Display program output
+    echo "$program_output"
+    
+    # Show runtime status if there were performance issues
+    if [[ "$runtime_status" != "OK" ]]; then
+      if [[ "$color_output" == "true" ]]; then
+        case "$runtime_status" in
+          "TLE")
+            echo -e "\e[31m\e[1mStatus:\e[0m Program execution failed due to Time Limit Exceeded (TLE)"
+            ;;
+          "MLE")
+            echo -e "\e[31m\e[1mStatus:\e[0m Program execution failed due to Memory Limit Exceeded (MLE)"
+            ;;
+          "TLE+MLE")
+            echo -e "\e[31m\e[1mStatus:\e[0m Program execution failed due to Time Limit Exceeded (TLE) and Memory Limit Exceeded (MLE)"
+            ;;
+        esac
+      else
+        case "$runtime_status" in
+          "TLE")
+            echo "Status: Program execution failed due to Time Limit Exceeded (TLE)"
+            ;;
+          "MLE")
+            echo "Status: Program execution failed due to Memory Limit Exceeded (MLE)"
+            ;;
+          "TLE+MLE")
+            echo "Status: Program execution failed due to Time Limit Exceeded (TLE) and Memory Limit Exceeded (MLE)"
+            ;;
+        esac
+      fi
+    fi
+  fi
+
+  # Display performance metrics if they were collected
+  if [[ "$measure_performance" == "true" && -f "$perf_file" ]]; then
     display_performance "$PERF_RUNTIME_MS" "$PERF_MEMORY_KB" "$PERF_TIME_LIMIT" "$PERF_MEMORY_LIMIT" "$PERF_TLE_STATUS" "$PERF_MLE_STATUS"
     rm -f "$perf_file"
   fi

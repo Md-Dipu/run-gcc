@@ -418,6 +418,13 @@ main() {
   local exit_code=0
   local generate_config_flag="false"
   local config_type="local"
+  
+  # Track command line overrides
+  local cmd_line_performance_set="false"
+  local cmd_line_show_performance_set="false"
+  local cmd_line_time_limit_set="false"
+  local cmd_line_memory_limit_set="false"
+  local cmd_line_show_diff_set="false"
 
   # Check if help, version, or generate-config options are provided
   if [[ $# -ge 1 ]]; then
@@ -490,6 +497,7 @@ main() {
       ;;
     -d | --diff)
       show_diff="true"
+      cmd_line_show_diff_set="true"
       shift
       ;;
     -n | --no-config)
@@ -498,6 +506,7 @@ main() {
       ;;
     -p | --performance)
       measure_performance="true"
+      cmd_line_performance_set="true"
       shift
       ;;
     -t | --time-limit)
@@ -506,6 +515,8 @@ main() {
       fi
       time_limit="$2"
       measure_performance="true"
+      cmd_line_time_limit_set="true"
+      cmd_line_performance_set="true"
       shift 2
       ;;
     -m | --memory-limit)
@@ -514,10 +525,13 @@ main() {
       fi
       memory_limit="$2"
       measure_performance="true"
+      cmd_line_memory_limit_set="true"
+      cmd_line_performance_set="true"
       shift 2
       ;;
     --no-performance)
       show_performance="false"
+      cmd_line_show_performance_set="true"
       shift
       ;;
     -*)
@@ -535,9 +549,33 @@ main() {
     exit 0
   fi
 
+  # Store command line overrides before loading config
+  local cmd_show_performance="$show_performance"
+  local cmd_measure_performance="$measure_performance"
+  local cmd_time_limit="$time_limit"
+  local cmd_memory_limit="$memory_limit"
+  local cmd_show_diff="$show_diff"
+
   # Load configuration files unless skipped
   if [[ "$skip_config" != "true" ]]; then
     load_config
+
+    # Restore command line overrides after config loading
+    if [[ "$cmd_line_show_performance_set" == "true" ]]; then
+      show_performance="$cmd_show_performance"
+    fi
+    if [[ "$cmd_line_performance_set" == "true" ]]; then
+      measure_performance="$cmd_measure_performance"
+    fi
+    if [[ "$cmd_line_time_limit_set" == "true" ]]; then
+      time_limit="$cmd_time_limit"
+    fi
+    if [[ "$cmd_line_memory_limit_set" == "true" ]]; then
+      memory_limit="$cmd_memory_limit"
+    fi
+    if [[ "$cmd_line_show_diff_set" == "true" ]]; then
+      show_diff="$cmd_show_diff"
+    fi
 
     # Override input file and expected file if not already set manually
     input_file="${input_file:-$default_input_file}"

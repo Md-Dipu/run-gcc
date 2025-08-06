@@ -396,25 +396,25 @@ compare_output() {
     if [[ "$color_output" == "true" ]]; then
       case "$runtime_status" in
         "TLE")
-          echo -e "\e[31m\e[1mFailure:\e[0m Program execution failed due to Time Limit Exceeded (TLE)"
+          echo -e "\e[31m\e[1m[TLE]\e[0m Time Limit Exceeded \e[33m(skipped)\e[0m"
           ;;
         "MLE")
-          echo -e "\e[31m\e[1mFailure:\e[0m Program execution failed due to Memory Limit Exceeded (MLE)"
+          echo -e "\e[31m\e[1m[MLE]\e[0m Memory Limit Exceeded \e[33m(skipped)\e[0m"
           ;;
         "TLE+MLE")
-          echo -e "\e[31m\e[1mFailure:\e[0m Program execution failed due to Time Limit Exceeded (TLE) and Memory Limit Exceeded (MLE)"
+          echo -e "\e[31m\e[1m[TLE+MLE]\e[0m Limits Exceeded \e[33m(skipped)\e[0m"
           ;;
       esac
     else
       case "$runtime_status" in
         "TLE")
-          echo "Failure: Program execution failed due to Time Limit Exceeded (TLE)"
+          echo "[TLE] Time Limit Exceeded (skipped)"
           ;;
         "MLE")
-          echo "Failure: Program execution failed due to Memory Limit Exceeded (MLE)"
+          echo "[MLE] Memory Limit Exceeded (skipped)"
           ;;
         "TLE+MLE")
-          echo "Failure: Program execution failed due to Time Limit Exceeded (TLE) and Memory Limit Exceeded (MLE)"
+          echo "[TLE+MLE] Limits Exceeded (skipped)"
           ;;
       esac
     fi
@@ -424,15 +424,15 @@ compare_output() {
   # Normal output comparison if no performance issues
   if diff <(echo "$program_output") "$expected_file" >/dev/null; then
     if [[ "$color_output" == "true" ]]; then
-      echo -e "\e[32m\e[1mSuccess:\e[0m Program output matches the expected output."
+      echo -e "\e[32m\e[1m[PASS]\e[0m Output matches expected"
     else
-      echo "Success: Program output matches the expected output."
+      echo "[PASS] Output matches expected"
     fi
   else
     if [[ "$color_output" == "true" ]]; then
-      echo -e "\e[31m\e[1mFailure:\e[0m Program output does not match the expected output."
+      echo -e "\e[31m\e[1m[FAIL]\e[0m Output mismatch"
     else
-      echo "Failure: Program output does not match the expected output."
+      echo "[FAIL] Output mismatch"
     fi
     if [[ "$show_diff" == "true" ]]; then
       echo
@@ -677,25 +677,25 @@ main() {
       if [[ "$color_output" == "true" ]]; then
         case "$runtime_status" in
           "TLE")
-            echo -e "\e[31m\e[1mStatus:\e[0m Program execution failed due to Time Limit Exceeded (TLE)"
+            echo -e "\e[31m\e[1m[TLE]\e[0m Time Limit Exceeded"
             ;;
           "MLE")
-            echo -e "\e[31m\e[1mStatus:\e[0m Program execution failed due to Memory Limit Exceeded (MLE)"
+            echo -e "\e[31m\e[1m[MLE]\e[0m Memory Limit Exceeded"
             ;;
           "TLE+MLE")
-            echo -e "\e[31m\e[1mStatus:\e[0m Program execution failed due to Time Limit Exceeded (TLE) and Memory Limit Exceeded (MLE)"
+            echo -e "\e[31m\e[1m[TLE+MLE]\e[0m Limits Exceeded"
             ;;
         esac
       else
         case "$runtime_status" in
           "TLE")
-            echo "Status: Program execution failed due to Time Limit Exceeded (TLE)"
+            echo "[TLE] Time Limit Exceeded"
             ;;
           "MLE")
-            echo "Status: Program execution failed due to Memory Limit Exceeded (MLE)"
+            echo "[MLE] Memory Limit Exceeded"
             ;;
           "TLE+MLE")
-            echo "Status: Program execution failed due to Time Limit Exceeded (TLE) and Memory Limit Exceeded (MLE)"
+            echo "[TLE+MLE] Limits Exceeded"
             ;;
         esac
       fi
